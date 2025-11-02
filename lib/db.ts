@@ -4,11 +4,17 @@ import { createClient } from 'redis';
 // Initialize Postgres client
 const sql = postgres(process.env.DATABASE_URL!);
 
-// Initialize Redis clients for pub/sub
-const redisSubscriber = createClient({ url: process.env.REDIS_URL || 'redis://localhost:6379' });
-const redisPublisher = createClient({ url: process.env.REDIS_URL || 'redis://localhost:6379' });
-redisSubscriber.connect().then(() => console.log('Redis subscriber connected')).catch(console.error);
-redisPublisher.connect().then(() => console.log('Redis publisher connected')).catch(console.error);
+// Initialize Redis clients for pub/sub (optional for transcripts)
+let redisSubscriber: any;
+let redisPublisher: any;
+try {
+  redisSubscriber = createClient({ url: process.env.REDIS_URL || 'redis://localhost:6379' });
+  redisPublisher = createClient({ url: process.env.REDIS_URL || 'redis://localhost:6379' });
+  redisSubscriber.connect().then(() => console.log('Redis subscriber connected')).catch(() => console.log('Redis subscriber not available'));
+  redisPublisher.connect().then(() => console.log('Redis publisher connected')).catch(() => console.log('Redis publisher not available'));
+} catch {
+  console.log('Redis not available, skipping pub/sub');
+}
 
 // Job interface
 export interface Job {
@@ -21,6 +27,18 @@ export interface Job {
   error?: string;
   createdAt: Date;
   updatedAt: Date;
+}
+
+// Transcript interface
+export interface Transcript {
+  id?: number;
+  videoId: string;
+  url: string;
+  transcriptText: string;  // Now: "start|text\nstart|text..." format
+  language?: string;
+  isGenerated?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 // Map to store callbacks for each job channel
@@ -57,7 +75,7 @@ export async function updateJob(id: string, updates: Partial<Pick<Job, 'status' 
   // Publish event to Redis
   console.log('Publishing event for job', id, updates);
   const job = await getJob(id);
-  if (job) {
+  if (job && redisPublisher) {
     const channel = `job:${id}`;
     try {
       if (updates.status && updates.status !== 'done' && updates.status !== 'error') {
@@ -81,6 +99,8 @@ export async function updateJob(id: string, updates: Partial<Pick<Job, 'status' 
 
 // Subscribe to job events
 export async function subscribeToJob(id: string, callback: (evt: { type: string; data: any }) => void): Promise<() => void> {
+  if (!redisSubscriber) return () => {}; // No-op if Redis not available
+
   const channel = `job:${id}`;
 
   // Add callback to the map
@@ -121,6 +141,15 @@ export async function subscribeToJob(id: string, callback: (evt: { type: string;
 // Close DB connection (call on app shutdown)
 export async function closeDb(): Promise<void> {
   await sql.end();
-  await redisSubscriber.quit();
-  await redisPublisher.quit();
+  if (redisSubscriber) await redisSubscriber.quit();
+  if (redisPublisher) await redisPublisher.quit();
+}
+
+// Insert transcript
+export async function insertTranscript(transcript: Omit<Transcript, 'id' | 'createdAt' | 'updatedAt'>): Promise<void> {
+  const now = new Date();
+  await sql`
+    INSERT INTO transcripts (video_id, url, transcript_text, language, is_generated, created_at, updated_at)
+    VALUES (${transcript.videoId}, ${transcript.url}, ${transcript.transcriptText}, ${transcript.language ?? 'en'}, ${transcript.isGenerated ?? false}, ${now}, ${now})
+  `;
 }
