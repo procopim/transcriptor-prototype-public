@@ -2,14 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-
-interface Job {
-  id: string;
-  status: 'queued' | 'processing' | 'done' | 'error';
-  progress: number;
-  result?: string;
-  error?: string;
-}
+import { Job }  from '@/lib/db';
 
 export default function ResultPage() {
   const { id } = useParams<{ id: string }>();

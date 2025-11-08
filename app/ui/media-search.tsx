@@ -71,7 +71,7 @@ export default function MediaSearchForm() {
         <input
           className="px-4 py-3 text-lg border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:bg-zinc-900 dark:border-zinc-700 dark:text-zinc-50"
           type="text"
-          placeholder="What are the names of the books mentioned?"
+          placeholder="What are the names of the books discussed?"
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
           maxLength={120}
