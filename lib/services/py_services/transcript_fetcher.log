@@ -1,0 +1,30 @@
+2025-11-02 18:07:12,491 - ERROR - Error fetching transcript for URL https://www.youtube.com/watch?v=0qnZDMvJPh4: fetch() missing 1 required positional argument: 'video_id'
+2025-11-02 18:34:49,169 - ERROR - Error fetching transcript for URL https://www.youtube.com/watch?v=0qnZDMvJPh4: 'FetchedTranscriptSnippet' object is not subscriptable
+2025-11-02 18:37:00,173 - ERROR - Error fetching transcript for URL https://www.youtube.com/watch?v=0qnZDMvJPh4: 'FetchedTranscriptSnippet' object is not subscriptable
+2025-11-02 18:41:39,163 - INFO - Transcript fetched for: 0qnZDMvJPh4
+2025-11-02 18:41:39,164 - INFO - Successfully fetched and formatted transcript for URL: https://www.youtube.com/watch?v=0qnZDMvJPh4
+2025-11-02 18:41:40,537 - ERROR - Failed to post transcript for video_id 0qnZDMvJPh4: 400 - {"error":"Missing required fields: videoId, url, transcriptText"}
+2025-11-02 18:44:54,002 - INFO - Transcript fetched for: 0qnZDMvJPh4
+2025-11-02 18:44:54,003 - INFO - Successfully fetched and formatted transcript for URL: https://www.youtube.com/watch?v=0qnZDMvJPh4
+2025-11-02 18:44:54,329 - ERROR - Failed to post transcript for video_id 0qnZDMvJPh4: 400 - {"error":"Missing required fields: videoId, url, transcriptText"}
+2025-11-02 18:45:55,786 - INFO - Transcript fetched for: 0qnZDMvJPh4
+2025-11-02 18:45:55,786 - INFO - Successfully fetched and formatted transcript for URL: https://www.youtube.com/watch?v=0qnZDMvJPh4
+2025-11-02 18:45:55,987 - ERROR - Failed to post transcript for video_id 0qnZDMvJPh4: 400 - {"error":"Missing required fields: videoId, url, transcriptText"}
+2025-11-02 18:47:21,938 - INFO - Transcript fetched for: 0qnZDMvJPh4
+2025-11-02 18:47:21,938 - INFO - Successfully fetched and formatted transcript for URL: https://www.youtube.com/watch?v=0qnZDMvJPh4
+2025-11-02 18:47:23,649 - INFO - Successfully posted transcript for video_id: 0qnZDMvJPh4
+2025-11-02 18:54:14,568 - INFO - Transcript fetched for: HIp8sFB2GGw
+2025-11-02 18:54:14,568 - INFO - Successfully fetched and formatted transcript for URL: https://www.youtube.com/watch?v=HIp8sFB2GGw
+2025-11-02 18:54:16,289 - INFO - Successfully posted transcript for videoId: HIp8sFB2GGw
+2025-11-03 21:48:56,371 - INFO - Transcript fetched for: T2FV1Ir344A
+2025-11-03 21:48:56,384 - INFO - Successfully fetched and formatted transcript for URL: https://www.youtube.com/watch?v=T2FV1Ir344A
+2025-11-03 21:48:56,694 - ERROR - Failed to post transcript for videoId T2FV1Ir344A: 400 - {"error":"Missing required fields: video_id, url, transcript_text"}
+2025-11-03 21:50:24,721 - INFO - Transcript fetched for: T2FV1Ir344A
+2025-11-03 21:50:24,722 - INFO - Successfully fetched and formatted transcript for URL: https://www.youtube.com/watch?v=T2FV1Ir344A
+2025-11-03 21:50:24,736 - ERROR - Failed to post transcript for videoId T2FV1Ir344A: 400 - {"error":"Missing required fields: video_id, url, transcript_text"}
+2025-11-03 21:51:26,053 - INFO - Transcript fetched for: T2FV1Ir344A
+2025-11-03 21:51:26,055 - INFO - Successfully fetched and formatted transcript for URL: https://www.youtube.com/watch?v=T2FV1Ir344A
+2025-11-03 21:51:26,653 - INFO - Successfully posted transcript for video_id: T2FV1Ir344A
+2025-11-04 16:20:44,425 - INFO - Transcript fetched for: yJnpb5Ekkvk
+2025-11-04 16:20:44,439 - INFO - Successfully fetched and formatted transcript for URL: https://www.youtube.com/watch?v=yJnpb5Ekkvk
+2025-11-04 16:20:45,295 - INFO - Successfully posted transcript for video_id: yJnpb5Ekkvk
