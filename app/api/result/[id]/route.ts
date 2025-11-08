@@ -12,11 +12,11 @@ export async function GET(
   // Example response shape
   return NextResponse.json({
     id: job.id,
-    status: job.status, // "queued" | "processing" | "done" | "error"
+    status: job.status, // "submitted" | "queued" | "processing" | "done" | "error"
     progress: job.progress ?? 0,
     result: job.result ?? null, // when done
     error: job.error ?? null,
-    createdAt: job.createdAt,
-    updatedAt: job.updatedAt,
+    createdAt: job.created_at,
+    updatedAt: job.updated_at,
   });
 }

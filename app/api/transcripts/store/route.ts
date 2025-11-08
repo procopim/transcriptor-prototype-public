@@ -4,20 +4,20 @@ import { insertTranscript } from "@/lib/db";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { videoId, url, transcriptText, language, isGenerated } = body;
+    const { video_id, url, transcript_text, language, is_generated } = body;
 
     // Basic validation
-    if (!videoId || !url || !transcriptText) {
-      return NextResponse.json({ error: "Missing required fields: videoId, url, transcriptText" }, { status: 400 });
+    if (!video_id || !url || !transcript_text) {
+      return NextResponse.json({ error: "Missing required fields: video_id, url, transcript_text" }, { status: 400 });
     }
 
     // Insert into database
     await insertTranscript({
-      videoId,
+      video_id,
       url,
-      transcriptText,
+      transcript_text,
       language: language || 'en',
-      isGenerated: isGenerated || false,
+      is_generated: is_generated || false,
     });
 
     return NextResponse.json({ message: "Transcript stored successfully" }, { status: 201 });

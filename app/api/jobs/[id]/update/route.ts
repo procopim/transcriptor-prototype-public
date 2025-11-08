@@ -4,7 +4,7 @@ import { updateJob } from '@/lib/db';
 
 // Schema for job update payload (partial updates allowed)
 const jobUpdateSchema = z.object({
-  status: z.enum(['queued', 'processing', 'done', 'error']).optional(),
+  status: z.enum(['submitted', 'queued', 'processing', 'done', 'error']).optional(),
   progress: z.number().min(0).max(100).optional(),
   result: z.string().optional(),
   error: z.string().optional(),
@@ -30,7 +30,7 @@ export async function POST(
     return NextResponse.json({ success: true });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Validation failed', details: error.errors }, { status: 400 });
+      return NextResponse.json({ error: 'Validation failed', details: error.issues }, { status: 400 });
     }
     console.error('Error updating job:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

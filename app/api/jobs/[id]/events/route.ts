@@ -1,5 +1,5 @@
 import { NextResponse, NextRequest } from "next/server";
-import { subscribeToJob } from "@/lib/db";
+import { subscribeToJob } from "@/lib/redis-pubsub";
 
 // Server-Sent Events endpoint for job progress streaming
 export async function GET(
@@ -52,6 +52,7 @@ export async function GET(
 }
 
 function createSSEStream() {
+  //creates Readable Stream for SSE, with send and close methods
   const encoder = new TextEncoder();
   let controller: ReadableStreamDefaultController;
   const queue: string[] = [];
@@ -73,5 +74,5 @@ function createSSEStream() {
     }
   };
   const close = () => controller?.close();
-  return { readable: stream, send, close };
+  return { readable: stream, send, close }; //returns an object
 }
