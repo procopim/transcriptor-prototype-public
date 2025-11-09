@@ -19,6 +19,7 @@ export async function GET(
       if (evt.type === "done" || evt.type === "error") {
         // Allow client to finish reading before closing
         setTimeout(() => {
+          clearInterval(ping);
           close();
           unsubscribe();
         }, 50);
@@ -55,6 +56,7 @@ function createSSEStream() {
   //creates Readable Stream for SSE, with send and close methods
   const encoder = new TextEncoder();
   let controller: ReadableStreamDefaultController;
+  let isClosed = false;
   const queue: string[] = [];
   const stream = new ReadableStream({
     start(c) {
@@ -67,12 +69,17 @@ function createSSEStream() {
   });
   const send = (event: string, data: string) => {
     const payload = `event: ${event}\ndata: ${data}\n\n`;
-    if (controller) {
+    if (controller && !isClosed) {
       controller.enqueue(encoder.encode(payload));
-    } else {
+    } else if (!isClosed) {
       queue.push(payload);
     }
   };
-  const close = () => controller?.close();
+  const close = () => {
+    if (!isClosed) {
+      controller?.close();
+      isClosed = true;
+    }
+  };
   return { readable: stream, send, close }; //returns an object
 }

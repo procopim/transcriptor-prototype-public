@@ -84,5 +84,7 @@ export async function insertTranscript(transcript: Omit<Transcript, 'id' | 'crea
   await sql`
     INSERT INTO transcripts (video_id, url, transcript_text, language, is_generated, created_at, updated_at)
     VALUES (${transcript.video_id}, ${transcript.url}, ${transcript.transcript_text}, ${transcript.language ?? 'en'}, ${transcript.is_generated ?? false}, ${now}, ${now})
+    ON CONFLICT (video_id) DO NOTHING
   `;
+
 }

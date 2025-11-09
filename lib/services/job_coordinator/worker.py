@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 import os
+import sys
 from rq import Worker, Queue
 from redis import Redis
 from dotenv import load_dotenv
 
-# Import the job function
-from .tasks import job_wrapper
+# Import the job function; importing job_wrapper explicitly in the worker at startup, 
+# causes tasks module to get loaded into memory, ensuring RQ can access the function when executing jobs. 
+from lib.services.job_coordinator.tasks import job_wrapper
 
 # Load env
 load_dotenv()

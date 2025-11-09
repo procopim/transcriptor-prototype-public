@@ -4,6 +4,7 @@ import requests
 from rq import Queue
 from redis import Redis
 from dotenv import load_dotenv
+from time import sleep
 
 from .job_helpers_funcs import update_job_status
 
@@ -51,6 +52,7 @@ def enqueue_job(job_id):
         # Update status to 'queued' via API
         update_job_status(job_id, 'queued', 20)
         print(f"Enqueuer: Updated job {job_id} status to queued", file=sys.stderr)
+        sleep(1)
     except Exception as e:
         error_msg = f"Failed to enqueue job {job_id} to RQ: {e}"
         print(error_msg, file=sys.stderr)
