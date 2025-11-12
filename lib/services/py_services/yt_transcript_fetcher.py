@@ -9,13 +9,17 @@ import logging
 import os
 import requests
 from youtube_transcript_api import YouTubeTranscriptApi
+from youtube_transcript_api.proxies import GenericProxyConfig
 from dotenv import load_dotenv
+from requests import Session
 
 # Load environment variables from .env file
 load_dotenv()
 
 # Get API base URL from environment, with fallback
 API_BASE_URL = os.getenv('API_BASE_URL', 'http://localhost:3000')
+PROXY = os.getenv('PROXY', '')
+PROXY_AUTH = os.getenv('PROXY_AUTH', '')
 
 # Set up logging to file
 logging.basicConfig(
@@ -35,9 +39,14 @@ def extract_video_id(url):
 
 def fetch_transcript(url):
     try:
+        httpclient=Session()
         video_id = extract_video_id(url)
-        ytt_api = YouTubeTranscriptApi()
+        ytt_api = YouTubeTranscriptApi(proxy_config=GenericProxyConfig(
+            http_url=f"http://{PROXY_AUTH}@{PROXY}",
+            https_url=f"http://{PROXY_AUTH}@{PROXY}"))
+        print("Fetching transcript for video ID:", video_id)
         transcript = ytt_api.fetch(video_id)
+        print(len(transcript))
         logging.info(f"Transcript fetched for: {video_id}")
         # Format as "start|text\nstart|text..." for AI with timestamps
         timestamped_text = '\n'.join([f"{snippet.start:.1f}|{snippet.text}" for snippet in transcript])
