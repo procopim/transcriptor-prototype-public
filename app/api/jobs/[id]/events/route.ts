@@ -12,14 +12,15 @@ export async function GET(
     const { readable, send, close } = createSSEStream();
 
     // Subscribe to progress/result events for this job id
+    // we're passing a callback function that will be called on each event by redis-pubsub
     const unsubscribe = await subscribeToJob(id, (evt: { type: string; data: any }) => {
       console.log('SSE callback triggered for job', id, 'event:', evt);
       // evt: { type: "progress" | "token" | "done" | "error", data: any }
       send('message', JSON.stringify({ type: evt.type, data: evt.data }));
       if (evt.type === "done" || evt.type === "error") {
         clearInterval(ping);
-        close();
-        unsubscribe();
+        close(); //SSE close()
+        unsubscribe(); //returns the unsubscribe function passed back by subscribeToJob
       }
     });
 
@@ -27,7 +28,7 @@ export async function GET(
     // Heartbeats so proxies don't kill the connection
     const ping = setInterval(() => send("ping", Date.now().toString()), 15000);
 
-    // Clean up on client disconnect
+    // Clean up on client disconnect; runs automaticlaly on client disconnect 
     readable.cancel = () => {
       clearInterval(ping);
       unsubscribe();
