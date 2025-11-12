@@ -61,7 +61,7 @@ export default function MediaSearchForm() {
       <div className="h-9" />
       <form onSubmit={handleSubmit} className="w-full max-w-2xl flex flex-col gap-4">
         <input
-          className="px-4 py-3 text-lg border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:bg-zinc-900 dark:border-zinc-700 dark:text-zinc-50"
+          className="px-4 py-3 text-base sm:text-lg border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:bg-zinc-900 dark:border-zinc-700 dark:text-zinc-50"
           type="url"
           placeholder="Paste YouTube URL here..."
           value={sourceUrl}
@@ -69,7 +69,7 @@ export default function MediaSearchForm() {
           required
         />
         <input
-          className="px-4 py-3 text-lg border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:bg-zinc-900 dark:border-zinc-700 dark:text-zinc-50"
+          className="px-4 py-3 text-base sm:text-lg border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:bg-zinc-900 dark:border-zinc-700 dark:text-zinc-50"
           type="text"
           placeholder="What are the names of the books discussed?"
           value={question}
@@ -91,7 +91,7 @@ export default function MediaSearchForm() {
       <p className="text-md leading-15 text-zinc-700 dark:text-zinc-400">
         Have a podcast episode you want to explore? Just paste the link and ask away!
       </p>
-      <p className="text-md leading-1 text-zinc-700 dark:text-zinc-400">
+      <p className="text-sm leading-relaxed text-zinc-700 dark:text-zinc-400 break-words">
         Transcriptor helps you recall details that you might have missed or want to return to.
       </p>
     </div>
