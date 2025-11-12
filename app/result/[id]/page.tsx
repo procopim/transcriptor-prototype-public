@@ -1,81 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { Job }  from '@/lib/db';
+import { useJobUpdates } from '@/lib/hooks/useJobUpdates';
 
 export default function ResultPage() {
   const { id } = useParams<{ id: string }>();
-  const [job, setJob] = useState<Job | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!id) return;
-
-    console.log('Fetching initial job data for', id);
-    // Fetch initial job status
-    fetch(`/api/result/${id}`)
-      .then(res => res.json())
-      .then(data => {
-        if (data.message === 'Not found') {
-          setError('Job not found');
-        } else {
-          setJob(data);
-        }
-        setLoading(false);
-        console.log('Initial job data', data);
-      })
-      .catch(err => {
-        console.error('Error fetching job', err);
-        setError('Failed to load job');
-        setLoading(false);
-      });
-
-    console.log('Connecting to SSE for', id);
-    // Connect to SSE for real-time updates
-    const eventSource = new EventSource(`/api/jobs/${id}/events`);
-
-    eventSource.onopen = () => console.log('SSE connection opened');
-    eventSource.onmessage = (event) => {
-      console.log('SSE raw message', event.data);
-      const parsed = JSON.parse(event.data);
-      console.log('SSE message received', parsed.type, parsed.data);
-      if (parsed.type === 'progress') {
-        setJob(prev => prev ? { ...prev, progress: parsed.data } : null);
-      } else if (parsed.type === 'status') {
-        setJob(prev => prev ? { ...prev, status: parsed.data } : null);
-      } else if (parsed.type === 'done') {
-        setJob(prev => prev ? { ...prev, status: 'done', result: parsed.data } : null);
-      } else if (parsed.type === 'error') {
-        setJob(prev => prev ? { ...prev, status: 'error', error: parsed.data } : null);
-      }
-    };
-
-    eventSource.onerror = (error) => {
-      console.log('SSE error, falling back to polling', error);
-      // Fallback to polling if SSE fails
-      const poll = setInterval(() => {
-        console.log('Polling for updates');
-        fetch(`/api/result/${id}`)
-          .then(res => res.json())
-          .then(data => {
-            console.log('Polled data', data);
-            setJob(data);
-            if (data.status === 'done' || data.status === 'error') {
-              clearInterval(poll);
-            }
-          });
-      }, 2000);
-
-      return () => clearInterval(poll);
-    };
-
-    return () => {
-      console.log('Closing SSE connection');
-      eventSource.close();
-    };
-  }, [id]);
+  const { job, loading, error } = useJobUpdates(id);
 
   const copyToClipboard = async () => {
     if (job?.result) {

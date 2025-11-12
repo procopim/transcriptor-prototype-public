@@ -17,12 +17,9 @@ export async function GET(
       // evt: { type: "progress" | "token" | "done" | "error", data: any }
       send('message', JSON.stringify({ type: evt.type, data: evt.data }));
       if (evt.type === "done" || evt.type === "error") {
-        // Allow client to finish reading before closing
-        setTimeout(() => {
-          clearInterval(ping);
-          close();
-          unsubscribe();
-        }, 50);
+        clearInterval(ping);
+        close();
+        unsubscribe();
       }
     });
 
@@ -70,14 +67,23 @@ function createSSEStream() {
   const send = (event: string, data: string) => {
     const payload = `event: ${event}\ndata: ${data}\n\n`;
     if (controller && !isClosed) {
-      controller.enqueue(encoder.encode(payload));
+      try {
+        controller.enqueue(encoder.encode(payload));
+      } catch (e) {
+        // Controller may be closed by client
+        isClosed = true;
+      }
     } else if (!isClosed) {
       queue.push(payload);
     }
   };
   const close = () => {
     if (!isClosed) {
-      controller?.close();
+      try {
+        controller?.close();
+      } catch (e) {
+        // Controller may already be closed by client disconnect
+      }
       isClosed = true;
     }
   };

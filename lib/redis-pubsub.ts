@@ -3,11 +3,23 @@ import { createClient } from 'redis';
 // Initialize Redis clients for pub/sub
 let redisSubscriber: any;
 let redisPublisher: any;
+let subscriberConnected = false;
+let publisherConnected = false;
 try {
   redisSubscriber = createClient({ url: process.env.REDIS_URL || 'redis://localhost:6379' });
   redisPublisher = createClient({ url: process.env.REDIS_URL || 'redis://localhost:6379' });
-  redisSubscriber.connect().then(() => console.log('Redis subscriber connected')).catch(() => console.log('Redis subscriber not available'));
-  redisPublisher.connect().then(() => console.log('Redis publisher connected')).catch(() => console.log('Redis publisher not available'));
+  redisSubscriber.connect().then(() => {
+    if (!subscriberConnected) {
+      console.log('Redis subscriber connected');
+      subscriberConnected = true;
+    }
+  }).catch(() => console.log('Redis subscriber not available'));
+  redisPublisher.connect().then(() => {
+    if (!publisherConnected) {
+      console.log('Redis publisher connected');
+      publisherConnected = true;
+    }
+  }).catch(() => console.log('Redis publisher not available'));
 } catch {
   console.log('Redis not available, skipping pub/sub');
 }
