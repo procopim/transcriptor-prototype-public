@@ -14,8 +14,14 @@ export default function ResultPage() {
       return url.split('youtu.be/')[1].split('?')[0];
     } else if (url.includes('youtube.com/watch?v=')) {
       return url.split('v=')[1].split('&')[0];
+    } else if (url.includes('youtube.com/live/')) {
+      return url.split('youtube.com/live/')[1].split('?')[0];
+    } else if (url.includes('youtube.com/embed/')) {
+      return url.split('youtube.com/embed/')[1].split('?')[0];
+    } else if (url.includes('youtube.com/v/')) {
+      return url.split('youtube.com/v/')[1].split('?')[0];
     } else {
-      return("Invalid YouTube URL");
+      return ("Invalid YouTube URL");
     }
   };
 
