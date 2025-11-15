@@ -53,7 +53,7 @@ export default function MediaSearchForm() {
   return (
     <div className="flex flex-col items-center gap-6 text-center">
       <h1 className="w-full text-center text-4xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-        Transcriptor helps you recall those elusive details.
+        Transcriptor finds what you are looking for.
       </h1>
       <h2 className="w-full text-center text-xl font-semibold leading-9 text-black dark:text-zinc-50">
         Get started by pasting a Youtube URL and asking a question.
@@ -86,13 +86,13 @@ export default function MediaSearchForm() {
         </button>
       </form>
       <p className="text-xl leading-8 text-zinc-700 dark:text-zinc-400">
-        Ask Transcriptor to find those key details that were mentioned.
+        Ask Transcriptor to find details in long-form content that is important to you.
       </p>
       <p className="text-md leading-15 text-zinc-700 dark:text-zinc-400">
-        Have a podcast episode you want to explore? Just paste the link and ask away!
+        Have a podcast or lecture you want to explore?  Just paste the link and ask away!
       </p>
       <p className="text-sm leading-relaxed text-zinc-700 dark:text-zinc-400 break-words">
-        Transcriptor helps you recall details that you might have missed or want to return to.
+        in beta • free to use • built by <a href="https://www.mprocopio.ca" target="_blank" rel="noopener noreferrer" className="underline hover:text-zinc-900 dark:hover:text-zinc-50">procopim</a>
       </p>
     </div>
   );
