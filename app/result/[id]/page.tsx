@@ -1,6 +1,7 @@
 'use client';
 
 import { useParams } from 'next/navigation';
+import Link from 'next/link';
 import { useJobUpdates } from '@/lib/hooks/useJobUpdates';
 
 export default function ResultPage() {
@@ -18,17 +19,22 @@ export default function ResultPage() {
     }
   };
 
-  if (loading) return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
-  if (error) return <div className="flex justify-center items-center min-h-screen text-red-500">{error}</div>;
-  if (!job) return <div className="flex justify-center items-center min-h-screen">Job not found</div>;
+  if (loading) return <div className="flex flex-col items-center gap-6 text-center min-h-screen justify-center">Loading...</div>;
+  if (error) return <div className="flex flex-col items-center gap-6 text-center min-h-screen justify-center text-red-500">{error}</div>;
+  if (!job) return <div className="flex flex-col items-center gap-6 text-center min-h-screen justify-center">Job not found</div>;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-center mb-8 text-gray-900 dark:text-white">
-          Job Result: {job.id}
-        </h1>
+    <div className="flex flex-col items-center gap-6 text-center py-12 px-4">
+      <h1 className="w-full text-center text-4xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
+        Job Result
+      </h1>
+      <h2 className="w-full text-center text-xl font-semibold leading-9 text-black dark:text-zinc-50">
+        Here are the results for job {job.id}
+      </h2>
+      <div className="h-9" />
+      <div className="w-full max-w-2xl flex flex-col gap-4">
 
+      <div className="w-full max-w-2xl flex flex-col gap-4">
         {job.status === 'queued' && (
           <div className="text-center">
             <p className="text-lg text-gray-600 dark:text-gray-400">Job is queued...</p>
@@ -59,7 +65,7 @@ export default function ResultPage() {
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Result</h2>
               <button
                 onClick={copyToClipboard}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                className="px-4 py-2 bg-zinc-900 text-white rounded hover:bg-blue-700 transition-colors"
               >
                 Copy
               </button>
@@ -69,7 +75,11 @@ export default function ResultPage() {
             </div>
           </div>
         )}
+        <Link href="/" className="px-6 py-3 text-lg font-medium text-white bg-zinc-900 rounded-lg hover:bg-zinc-700 transition-colors dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-300 self-center mt-4">
+          New Ask
+        </Link>
       </div>
+    </div>
     </div>
   );
 }
