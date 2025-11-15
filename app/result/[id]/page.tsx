@@ -86,7 +86,7 @@ export default function ResultPage() {
                 const [seconds, ...textParts] = line.split(':');
                 const secs = seconds.split('.')[0];
                 const text = textParts.join('|').trim();
-                const stamp = `https://youtu.be/${extractVideoId(job.source_url)}?t=${secs}s`;
+                const stamp = `https://www.youtube.com/watch?v=${extractVideoId(job.source_url)}&t=${secs}`;
                 return (
                   <div key={index} className="flex mb-3">
                     <div className="flex-shrink-0 mr-2">
