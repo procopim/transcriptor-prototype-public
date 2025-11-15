@@ -1,5 +1,5 @@
 import { NextResponse, NextRequest } from "next/server";
-import { getJob } from "@/lib/db";
+import { getJob, Job } from "@/lib/db";
 
 export async function GET(
   req: NextRequest,
@@ -10,13 +10,16 @@ export async function GET(
   if (!job) return NextResponse.json({ message: "Not found" }, { status: 404 });
 
   // Example response shape
-  return NextResponse.json({
+  const response: Job = {
     id: job.id,
-    status: job.status, // "submitted" | "queued" | "processing" | "done" | "error"
-    progress: job.progress ?? 0,
-    result: job.result ?? null, // when done
-    error: job.error ?? null,
-    createdAt: job.created_at,
-    updatedAt: job.updated_at,
-  });
+    question: job.question,
+    source_url: job.source_url,
+    status: job.status,
+    progress: job.progress,
+    result: job.result,
+    error: job.error,
+    created_at: job.created_at,
+    updated_at: job.updated_at,
+  };
+  return NextResponse.json(response);
 }

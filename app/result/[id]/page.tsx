@@ -8,6 +8,17 @@ export default function ResultPage() {
   const { id } = useParams<{ id: string }>();
   const { job, loading, error } = useJobUpdates(id);
 
+  // Helper function to extract video ID from YouTube URL
+  const extractVideoId = (url: string): string => {
+    if (url.includes('youtu.be/')) {
+      return url.split('youtu.be/')[1].split('?')[0];
+    } else if (url.includes('youtube.com/watch?v=')) {
+      return url.split('v=')[1].split('&')[0];
+    } else {
+      return("Invalid YouTube URL");
+    }
+  };
+
   const copyToClipboard = async () => {
     if (job?.result) {
       try {
@@ -26,12 +37,12 @@ export default function ResultPage() {
   return (
     <div className="flex flex-col items-center gap-6 text-center py-12 px-4">
       <h1 className="w-full text-center text-4xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-        Job Result
+        Transcriptor status:
       </h1>
       <h2 className="w-full text-center text-xl font-semibold leading-9 text-black dark:text-zinc-50">
-        Here are the results for job {job.id}
+        {job.status}
       </h2>
-      <div className="h-9" />
+      <div className="h-3" />
       <div className="w-full max-w-2xl flex flex-col gap-4">
 
       <div className="w-full max-w-2xl flex flex-col gap-4">
@@ -71,7 +82,24 @@ export default function ResultPage() {
               </button>
             </div>
             <div className="max-h-96 overflow-y-auto border border-gray-300 dark:border-gray-600 rounded p-4 bg-gray-50 dark:bg-gray-700">
-              <pre className="whitespace-pre-wrap text-gray-900 dark:text-white">{job.result}</pre>
+              {job.result.split('\n').map((line, index) => {
+                const [seconds, ...textParts] = line.split(':');
+                const secs = seconds.split('.')[0];
+                const text = textParts.join('|').trim();
+                const stamp = `https://youtu.be/${extractVideoId(job.source_url)}?t=${secs}s`;
+                return (
+                  <div key={index} className="flex mb-3">
+                    <div className="flex-shrink-0 mr-2">
+                      <a href={stamp} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline font-medium">
+                        {'Timestamp ' + (index + 1) + ':' }
+                      </a>
+                    </div>
+                    <div className="whitespace-pre-wrap text-left">
+                      {text}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
@@ -83,3 +111,4 @@ export default function ResultPage() {
     </div>
   );
 }
+
