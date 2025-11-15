@@ -34,6 +34,12 @@ def extract_video_id(url):
         return url.split('youtu.be/')[1].split('?')[0]
     elif 'youtube.com/watch?v=' in url:
         return url.split('v=')[1].split('&')[0]
+    elif 'youtube.com/live/' in url:
+        return url.split('youtube.com/live/')[1].split('?')[0]
+    elif 'youtube.com/embed/' in url:
+        return url.split('youtube.com/embed/')[1].split('?')[0]
+    elif 'youtube.com/v/' in url:
+        return url.split('youtube.com/v/')[1].split('?')[0]
     else:
         raise ValueError("Invalid YouTube URL")
 
