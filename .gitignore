@@ -43,5 +43,5 @@ next-env.d.ts
 #python venv in lib/services
 */venv/
 *.pyc
-__pycache__/
+*/__pycache__/*
 *.pyo
