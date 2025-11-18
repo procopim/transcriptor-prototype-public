@@ -1,23 +1,15 @@
 import { z } from 'zod';
 import { Job, Transcript } from './types';
 
-export class JobDTO implements Job {
-  static schema = z.object({
-    id: z.string().min(1),
-    question: z.string().min(1),
-    source_url: z.string().url(),
-    status: z.enum(['submitted', 'queued', 'processing', 'fetched', 'done', 'error']),
-    progress: z.number().min(0).max(100),
-    result: z.string().optional(),
-    error: z.string().optional(),
-    created_at: z.date(),
-    updated_at: z.date(),
-  });
-
-  static validate(data: any): Job {
-    return this.schema.parse(data);
+// Base class for common DTO functionality
+abstract class BaseDTO {
+  // Validation method that operates on generic type and returns the same generic i.e. Job or Transcript
+  static validateWithSchema<T>(schema: z.ZodSchema<T>, data: any): T {
+    return schema.parse(data);
   }
+}
 
+export class JobDTO extends BaseDTO implements Job {
   id: string;
   question: string;
   source_url: string;
@@ -28,24 +20,55 @@ export class JobDTO implements Job {
   created_at: Date;
   updated_at: Date;
 
-  constructor(data: Omit<Job, 'created_at' | 'updated_at'> & { created_at?: Date; updated_at?: Date }) {
-    const validated = JobDTO.validate({
-      ...data,
-      created_at: data.created_at || new Date(),
-      updated_at: data.updated_at || new Date(),
-    });
-    this.id = validated.id;
-    this.question = validated.question;
-    this.source_url = validated.source_url;
-    this.status = validated.status;
-    this.progress = validated.progress;
-    this.result = validated.result;
-    this.error = validated.error;
-    this.created_at = validated.created_at;
-    this.updated_at = validated.updated_at;
+  // Zod schemas
+  static jobUpdateSchema = z.object({
+    status: z.enum(['submitted', 'queued', 'processing', 'fetched', 'done', 'error']).optional(),
+    progress: z.number().min(0).max(100).optional(),
+    result: z.string().optional(),
+    error: z.string().optional(),
+  }).refine(
+    (data) => Object.keys(data).length > 0,
+    { message: 'At least one field must be provided' }
+  );
+
+  static jobSchema = z.object({
+    id: z.string(),
+    question: z.string(),
+    source_url: z.string(),
+    status: z.enum(['submitted', 'queued', 'processing', 'fetched', 'done', 'error']),
+    progress: z.number().min(0).max(100),
+    result: z.string().optional(),
+    error: z.string().optional(),
+    created_at: z.date(),
+    updated_at: z.date(),
+  });
+
+  constructor(data: Job) {
+    super(); //allows us to use the validateWithSchema method at 'this' level
+    this.id = data.id;
+    this.question = data.question;
+    this.source_url = data.source_url;
+    this.status = data.status;
+    this.progress = data.progress;
+    this.result = data.result;
+    this.error = data.error;
+    this.created_at = data.created_at;
+    this.updated_at = data.updated_at;
   }
 
-  toJSON(): Record<string, any> {
+  // Validate full Job object
+  static validate(data: any): JobDTO {
+    const validated = this.validateWithSchema(this.jobSchema, data);
+    return new JobDTO(validated);
+  }
+
+  // Validate partial updates
+  static validateUpdate(updates: Partial<Job>): Partial<Job> {
+    return this.jobUpdateSchema.parse(updates);
+  }
+
+  // Serialize to JSON (e.g., for API responses)
+  toJSON() {
     return {
       id: this.id,
       question: this.question,
@@ -59,38 +82,33 @@ export class JobDTO implements Job {
     };
   }
 
+  // Deserialize from JSON (e.g., for API requests)
   static fromJSON(data: any): JobDTO {
-    const parsed = z.object({
-      id: z.string(),
-      question: z.string(),
-      source_url: z.string(),
-      status: z.enum(['submitted', 'queued', 'processing', 'fetched', 'done', 'error']),
-      progress: z.number(),
-      result: z.string().optional(),
-      error: z.string().optional(),
-      created_at: z.string().transform((str) => new Date(str)),
-      updated_at: z.string().transform((str) => new Date(str)),
-    }).parse(data);
-    return new JobDTO(parsed);
+    const parsed = {
+      ...data,
+      created_at: new Date(data.created_at),
+      updated_at: new Date(data.updated_at),
+    };
+    return this.validate(parsed);
+  }
+
+  // Factory method for DB rows
+  static fromDatabaseRow(row: any): JobDTO {
+    return new JobDTO({
+      id: row.id,
+      question: row.question,
+      source_url: row.source_url,
+      status: row.status,
+      progress: row.progress,
+      result: row.result,
+      error: row.error,
+      created_at: row.created_at,
+      updated_at: row.updated_at,
+    });
   }
 }
 
-export class TranscriptDTO implements Transcript {
-  static schema = z.object({
-    id: z.number().optional(),
-    video_id: z.string().min(1),
-    url: z.string().url(),
-    transcript_text: z.string().min(1),
-    language: z.string().optional(),
-    is_generated: z.boolean().optional(),
-    created_at: z.date().optional(),
-    updated_at: z.date().optional(),
-  });
-
-  static validate(data: any): Transcript {
-    return this.schema.parse(data);
-  }
-
+export class TranscriptDTO extends BaseDTO implements Transcript {
   id?: number;
   video_id: string;
   url: string;
@@ -100,19 +118,38 @@ export class TranscriptDTO implements Transcript {
   created_at?: Date;
   updated_at?: Date;
 
-  constructor(data: Omit<Transcript, 'id' | 'created_at' | 'updated_at'> & { id?: number; created_at?: Date; updated_at?: Date }) {
-    const validated = TranscriptDTO.validate(data);
-    this.id = validated.id;
-    this.video_id = validated.video_id;
-    this.url = validated.url;
-    this.transcript_text = validated.transcript_text;
-    this.language = validated.language;
-    this.is_generated = validated.is_generated;
-    this.created_at = validated.created_at;
-    this.updated_at = validated.updated_at;
+  // Zod schema
+  static transcriptSchema = z.object({
+    id: z.number().optional(),
+    video_id: z.string(),
+    url: z.string(),
+    transcript_text: z.string(),
+    language: z.string().optional(),
+    is_generated: z.boolean().optional(),
+    created_at: z.date().optional(),
+    updated_at: z.date().optional(),
+  });
+
+  constructor(data: Transcript) {
+    super(); //allows us to use the validateWithSchema method at 'this' level
+    this.id = data.id;
+    this.video_id = data.video_id;
+    this.url = data.url;
+    this.transcript_text = data.transcript_text;
+    this.language = data.language;
+    this.is_generated = data.is_generated;
+    this.created_at = data.created_at;
+    this.updated_at = data.updated_at;
   }
 
-  toJSON(): Record<string, any> {
+  // Validate full Transcript object
+  static validate(data: any): TranscriptDTO {
+    const validated = this.validateWithSchema(this.transcriptSchema, data);
+    return new TranscriptDTO(validated);
+  }
+
+  // Serialize to JSON
+  toJSON() {
     return {
       id: this.id,
       video_id: this.video_id,
@@ -125,17 +162,27 @@ export class TranscriptDTO implements Transcript {
     };
   }
 
+  // Deserialize from JSON
   static fromJSON(data: any): TranscriptDTO {
-    const parsed = z.object({
-      id: z.number().optional(),
-      video_id: z.string(),
-      url: z.string(),
-      transcript_text: z.string(),
-      language: z.string().optional(),
-      is_generated: z.boolean().optional(),
-      created_at: z.string().transform((str) => new Date(str)).optional(),
-      updated_at: z.string().transform((str) => new Date(str)).optional(),
-    }).parse(data);
-    return new TranscriptDTO(parsed);
+    const parsed = {
+      ...data,
+      created_at: data.created_at ? new Date(data.created_at) : undefined,
+      updated_at: data.updated_at ? new Date(data.updated_at) : undefined,
+    };
+    return this.validate(parsed);
+  }
+
+  // Factory method for DB rows
+  static fromDatabaseRow(row: any): TranscriptDTO {
+    return new TranscriptDTO({
+      id: row.id,
+      video_id: row.video_id,
+      url: row.url,
+      transcript_text: row.transcript_text,
+      language: row.language,
+      is_generated: row.is_generated,
+      created_at: row.created_at,
+      updated_at: row.updated_at,
+    });
   }
 }
