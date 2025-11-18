@@ -3,10 +3,26 @@
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useJobUpdates } from '@/lib/hooks/useJobUpdates';
+import { useState, useEffect } from 'react';
 
 export default function ResultPage() {
   const { id } = useParams<{ id: string }>();
   const { job, loading, error } = useJobUpdates(id);
+
+  const [displayProgress, setDisplayProgress] = useState(job?.progress || 0);
+
+  useEffect(() => {
+    setDisplayProgress(job?.progress || 0);
+  }, [job?.progress]);
+
+  useEffect(() => {
+    if (job?.status !== 'done' && job?.status !== 'error' && displayProgress > 0 && displayProgress < 100) {
+      const interval = setInterval(() => {
+        setDisplayProgress(prev => Math.min(prev + 0.12, 100));
+      }, 50);
+      return () => clearInterval(interval);
+    }
+  }, [job?.status, displayProgress]);
 
   // Helper function to extract video ID from YouTube URL
   const extractVideoId = (url: string): string => {
@@ -52,19 +68,13 @@ export default function ResultPage() {
       <div className="w-full max-w-2xl flex flex-col gap-4">
 
       <div className="w-full max-w-2xl flex flex-col gap-4">
-        {job.status === 'queued' && (
+        
+        {job.progress > 0 && job.status !== 'done' && job.status !== 'error' && (
           <div className="text-center">
-            <p className="text-lg text-gray-600 dark:text-gray-400">Job is queued...</p>
-          </div>
-        )}
-
-        {job.status === 'processing' && (
-          <div className="text-center">
-            <p className="text-lg text-gray-600 dark:text-gray-400 mb-4">Processing... {job.progress}%</p>
             <div className="w-full bg-gray-200 rounded-full h-4 dark:bg-gray-700">
               <div
                 className="bg-blue-600 h-4 rounded-full transition-all duration-300"
-                style={{ width: `${job.progress}%` }}
+                style={{ width: `${displayProgress}%` }}
               ></div>
             </div>
           </div>
