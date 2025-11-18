@@ -7,6 +7,9 @@ abstract class BaseDTO {
   static validateWithSchema<T>(schema: z.ZodSchema<T>, data: any): T {
     return schema.parse(data);
   }
+
+  // Abstract method for serialization
+  abstract toJSON(): Record<string, any>;
 }
 
 export class JobDTO extends BaseDTO implements Job {
@@ -39,8 +42,8 @@ export class JobDTO extends BaseDTO implements Job {
     progress: z.number().min(0).max(100),
     result: z.string().optional(),
     error: z.string().optional(),
-    created_at: z.date(),
-    updated_at: z.date(),
+    created_at: z.union([z.date(), z.string().transform((str) => new Date(str))]),
+    updated_at: z.union([z.date(), z.string().transform((str) => new Date(str))]),
   });
 
   constructor(data: Job) {
@@ -84,12 +87,8 @@ export class JobDTO extends BaseDTO implements Job {
 
   // Deserialize from JSON (e.g., for API requests)
   static fromJSON(data: any): JobDTO {
-    const parsed = {
-      ...data,
-      created_at: new Date(data.created_at),
-      updated_at: new Date(data.updated_at),
-    };
-    return this.validate(parsed);
+    const validated = this.validateWithSchema(this.jobSchema, data);
+    return new JobDTO(validated);
   }
 
   // Factory method for DB rows
@@ -126,8 +125,8 @@ export class TranscriptDTO extends BaseDTO implements Transcript {
     transcript_text: z.string(),
     language: z.string().optional(),
     is_generated: z.boolean().optional(),
-    created_at: z.date().optional(),
-    updated_at: z.date().optional(),
+    created_at: z.union([z.date(), z.string().transform((str) => new Date(str))]).optional(),
+    updated_at: z.union([z.date(), z.string().transform((str) => new Date(str))]).optional(),
   });
 
   constructor(data: Transcript) {
@@ -164,12 +163,8 @@ export class TranscriptDTO extends BaseDTO implements Transcript {
 
   // Deserialize from JSON
   static fromJSON(data: any): TranscriptDTO {
-    const parsed = {
-      ...data,
-      created_at: data.created_at ? new Date(data.created_at) : undefined,
-      updated_at: data.updated_at ? new Date(data.updated_at) : undefined,
-    };
-    return this.validate(parsed);
+    const validated = this.validateWithSchema(this.transcriptSchema, data);
+    return new TranscriptDTO(validated);
   }
 
   // Factory method for DB rows
