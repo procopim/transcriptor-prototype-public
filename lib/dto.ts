@@ -64,10 +64,10 @@ export class JobDTO extends BaseDTO implements Job {
     this.updated_at = validated.updated_at;
   }
 
-  // Validate full Job object
-  static validate(data: any): JobDTO {
+  // Validate full Job object and return validated data
+  static validate(data: any): Job {
     const validated = this.validateWithSchema(this.jobSchema, data);
-    return new JobDTO(validated);
+    return validated;
   }
 
   // Validate partial updates
@@ -99,15 +99,9 @@ export class JobDTO extends BaseDTO implements Job {
   // Factory method for DB rows
   static fromDatabaseRow(row: any): JobDTO {
     return new JobDTO({
-      id: row.id,
-      question: row.question,
-      source_url: row.source_url,
-      status: row.status,
-      progress: row.progress,
-      result: row.result,
-      error: row.error,
-      created_at: row.created_at,
-      updated_at: row.updated_at,
+      ...row,
+      result: row.result ?? undefined,
+      error: row.error ?? undefined,
     });
   }
 }
@@ -147,10 +141,10 @@ export class TranscriptDTO extends BaseDTO implements Transcript {
     this.updated_at = validated.updated_at;
   }
 
-  // Validate full Transcript object
-  static validate(data: any): TranscriptDTO {
+  // Validate full Transcript object and return validated data
+  static validate(data: any): Transcript {
     const validated = this.validateWithSchema(this.transcriptSchema, data);
-    return new TranscriptDTO(validated);
+    return validated;
   }
 
   // Serialize to JSON
@@ -176,14 +170,11 @@ export class TranscriptDTO extends BaseDTO implements Transcript {
   // Factory method for DB rows
   static fromDatabaseRow(row: any): TranscriptDTO {
     return new TranscriptDTO({
-      id: row.id,
-      video_id: row.video_id,
-      url: row.url,
-      transcript_text: row.transcript_text,
-      language: row.language,
-      is_generated: row.is_generated,
-      created_at: row.created_at,
-      updated_at: row.updated_at,
+      ...row,
+      language: row.language ?? undefined,
+      is_generated: row.is_generated ?? undefined,
+      created_at: row.created_at ?? undefined,
+      updated_at: row.updated_at ?? undefined,
     });
   }
 }
