@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ errors }, { status: 400 });
   }
 
-  const id = nanoid(12);
+  const id = nanoid(12); //create jobid
   await createJob({
     id,
     question,

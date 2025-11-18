@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Job } from '@/lib/db';
+import { Job } from '@/lib/types';
 
 export function useJobUpdates(jobId: string | null) {
   const [job, setJob] = useState<Job | null>(null);

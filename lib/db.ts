@@ -1,33 +1,9 @@
 import postgres from 'postgres';
 import { publishJobEvent, closeRedis } from './redis-pubsub';
+import { Job, Transcript } from './types';
 
 // Initialize Postgres client
 const sql = postgres(process.env.DATABASE_URL!);
-
-// Job interface
-export interface Job {
-  id: string;
-  question: string;
-  source_url: string;
-  status: 'submitted' | 'queued' | 'processing' | 'fetched' | 'done' | 'error';
-  progress: number;
-  result?: string;
-  error?: string;
-  created_at: Date;
-  updated_at: Date;
-}
-
-// Transcript interface
-export interface Transcript {
-  id?: number;
-  video_id: string;
-  url: string;
-  transcript_text: string;  // Now: "start|text\nstart|text..." format
-  language?: string;
-  is_generated?: boolean;
-  created_at?: Date;
-  updated_at?: Date;
-}
 
 // Create job
 export async function createJob(job: Omit<Job, 'created_at' | 'updated_at'>): Promise<void> {
