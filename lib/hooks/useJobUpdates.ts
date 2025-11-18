@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Job } from '@/lib/types';
+import { JobDTO } from '@/lib/dto';
 
 export function useJobUpdates(jobId: string | null) {
-  const [job, setJob] = useState<Job | null>(null);
+  const [job, setJob] = useState<JobDTO | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const eventSourceRef = useRef<EventSource | null>(null);
@@ -19,7 +19,7 @@ export function useJobUpdates(jobId: string | null) {
       if (data.message === 'Not found') {
         setError('Job not found');
       } else {
-        setJob(data);
+        setJob(JobDTO.fromJSON(data));
       }
       setLoading(false);
       console.log('Initial job data', data);
@@ -62,7 +62,7 @@ export function useJobUpdates(jobId: string | null) {
             eventSource.close();
             eventSourceRef.current = null;
         }
-        return updated;
+        return new JobDTO(updated);
       });
     };
 
@@ -79,7 +79,7 @@ export function useJobUpdates(jobId: string | null) {
           .then(res => res.json())
           .then(data => {
             console.log('Polled data', data);
-            setJob(data);
+            setJob(JobDTO.fromJSON(data));
             if (data.status === 'done' || data.status === 'error') {
               // Stop polling when done
               if (pollIntervalRef.current) {

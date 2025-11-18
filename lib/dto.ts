@@ -46,17 +46,22 @@ export class JobDTO extends BaseDTO implements Job {
     updated_at: z.union([z.date(), z.string().transform((str) => new Date(str))]),
   });
 
-  constructor(data: Job) {
+  constructor(data: Omit<Job, 'created_at' | 'updated_at'> & { created_at?: Date; updated_at?: Date }) {
     super(); //allows us to use the validateWithSchema method at 'this' level
-    this.id = data.id;
-    this.question = data.question;
-    this.source_url = data.source_url;
-    this.status = data.status;
-    this.progress = data.progress;
-    this.result = data.result;
-    this.error = data.error;
-    this.created_at = data.created_at;
-    this.updated_at = data.updated_at;
+    const validated = JobDTO.validate({
+      ...data,
+      created_at: data.created_at || new Date(), //Omitted if not provided by dependents, while optional
+      updated_at: data.updated_at || new Date(),
+    });
+    this.id = validated.id;
+    this.question = validated.question;
+    this.source_url = validated.source_url;
+    this.status = validated.status;
+    this.progress = validated.progress;
+    this.result = validated.result;
+    this.error = validated.error;
+    this.created_at = validated.created_at;
+    this.updated_at = validated.updated_at;
   }
 
   // Validate full Job object
@@ -129,16 +134,17 @@ export class TranscriptDTO extends BaseDTO implements Transcript {
     updated_at: z.union([z.date(), z.string().transform((str) => new Date(str))]).optional(),
   });
 
-  constructor(data: Transcript) {
+  constructor(data: Omit<Transcript, 'id' | 'created_at' | 'updated_at'> & { id?: number; created_at?: Date; updated_at?: Date }) {
     super(); //allows us to use the validateWithSchema method at 'this' level
-    this.id = data.id;
-    this.video_id = data.video_id;
-    this.url = data.url;
-    this.transcript_text = data.transcript_text;
-    this.language = data.language;
-    this.is_generated = data.is_generated;
-    this.created_at = data.created_at;
-    this.updated_at = data.updated_at;
+    const validated = TranscriptDTO.validate(data);
+    this.id = validated.id;
+    this.video_id = validated.video_id;
+    this.url = validated.url;
+    this.transcript_text = validated.transcript_text;
+    this.language = validated.language;
+    this.is_generated = validated.is_generated;
+    this.created_at = validated.created_at;
+    this.updated_at = validated.updated_at;
   }
 
   // Validate full Transcript object

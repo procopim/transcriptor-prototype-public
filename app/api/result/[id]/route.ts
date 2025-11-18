@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
 import { getJob } from "@/lib/db";
-import { Job } from "@/lib/types";
+import { JobDTO } from "@/lib/dto";
 
 export async function GET(
   req: NextRequest,
@@ -10,17 +10,5 @@ export async function GET(
   const job = await getJob(id);
   if (!job) return NextResponse.json({ message: "Not found" }, { status: 404 });
 
-  // Example response shape
-  const response: Job = {
-    id: job.id,
-    question: job.question,
-    source_url: job.source_url,
-    status: job.status,
-    progress: job.progress,
-    result: job.result,
-    error: job.error,
-    created_at: job.created_at,
-    updated_at: job.updated_at,
-  };
-  return NextResponse.json(response);
+  return NextResponse.json(job.toJSON());
 }

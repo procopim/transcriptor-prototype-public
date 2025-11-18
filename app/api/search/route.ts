@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import { createJob } from "@/lib/db";
 import { nanoid } from "nanoid";
+import { JobDTO } from "@/lib/dto";
 
 // API route to create a new search job, validate input, and POST to the python enqueue service
 
@@ -31,13 +32,14 @@ export async function POST(req: NextRequest) {
   }
 
   const id = nanoid(12); //create jobid
-  await createJob({
+  const jobDTO = new JobDTO({
     id,
     question,
     source_url,
     status: "submitted",
     progress: 0,
   });
+  await createJob(jobDTO);
 
   // Enqueue the job; POST to the python enqueue service, awaits on DB insertion
   const enqueueUrl = process.env.ENQUEUE_URL || 'http://localhost:8000/enqueue';
