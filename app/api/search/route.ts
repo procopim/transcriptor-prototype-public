@@ -6,7 +6,14 @@ import { JobDTO } from "@/lib/dto";
 // API route to create a new search job, validate input, and POST to the python enqueue service
 
 export async function POST(req: NextRequest) {
-  const body = await req.json().catch(() => ({} as any));
+
+  let body: any = {};
+  try {
+    body = await req.json();
+  } catch {
+      return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
   const question = typeof body.question === "string" ? body.question.trim() : "";
   const source_url = typeof body.sourceUrl === "string" ? body.sourceUrl.trim() : "";
 

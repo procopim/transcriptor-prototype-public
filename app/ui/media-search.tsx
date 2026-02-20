@@ -35,7 +35,7 @@ export default function MediaSearchForm() {
       const response = await fetch('/api/search', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question, sourceUrl }),
+        body: JSON.stringify({ question: question.trim(), sourceUrl }), //stringify these fields as keys with value the strings assigned to them
       });
       if (!response.ok) {
         const errorData = await response.json();
