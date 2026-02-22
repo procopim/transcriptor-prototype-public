@@ -22,6 +22,25 @@ export class JobDTO extends BaseDTO implements Job {
   error?: string;
   created_at: Date;
   updated_at: Date;
+  
+  // Constructor checks All Job props except the two are provided, with created_at and updated_at optional
+  constructor(data: Omit<Job, 'created_at' | 'updated_at'> & { created_at?: Date; updated_at?: Date }) {
+    super(); //allows us to use the validateWithSchema method at 'this' level
+    const validated = JobDTO.validate({
+      ...data,
+      created_at: data.created_at || new Date(), //Omitted if not provided by dependents, while optional in constructor
+      updated_at: data.updated_at || new Date(),
+    });
+    this.id = validated.id;
+    this.question = validated.question;
+    this.source_url = validated.source_url;
+    this.status = validated.status;
+    this.progress = validated.progress;
+    this.result = validated.result;
+    this.error = validated.error;
+    this.created_at = validated.created_at;
+    this.updated_at = validated.updated_at;
+  }
 
   // Zod schemas
   static jobUpdateSchema = z.object({
@@ -45,24 +64,6 @@ export class JobDTO extends BaseDTO implements Job {
     created_at: z.union([z.date(), z.string().transform((str) => new Date(str))]),
     updated_at: z.union([z.date(), z.string().transform((str) => new Date(str))]),
   });
-
-  constructor(data: Omit<Job, 'created_at' | 'updated_at'> & { created_at?: Date; updated_at?: Date }) {
-    super(); //allows us to use the validateWithSchema method at 'this' level
-    const validated = JobDTO.validate({
-      ...data,
-      created_at: data.created_at || new Date(), //Omitted if not provided by dependents, while optional
-      updated_at: data.updated_at || new Date(),
-    });
-    this.id = validated.id;
-    this.question = validated.question;
-    this.source_url = validated.source_url;
-    this.status = validated.status;
-    this.progress = validated.progress;
-    this.result = validated.result;
-    this.error = validated.error;
-    this.created_at = validated.created_at;
-    this.updated_at = validated.updated_at;
-  }
 
   // Validate full Job object and return validated data
   static validate(data: any): Job {
@@ -116,18 +117,7 @@ export class TranscriptDTO extends BaseDTO implements Transcript {
   created_at?: Date;
   updated_at?: Date;
 
-  // Zod schema
-  static transcriptSchema = z.object({
-    id: z.number().optional(),
-    video_id: z.string(),
-    url: z.string(),
-    transcript_text: z.string(),
-    language: z.string().optional(),
-    is_generated: z.boolean().optional(),
-    created_at: z.union([z.date(), z.string().transform((str) => new Date(str))]).optional(),
-    updated_at: z.union([z.date(), z.string().transform((str) => new Date(str))]).optional(),
-  });
-
+  // Constructor checks All Transcript props except the three are provided, with id, created_at and updated_at optional
   constructor(data: Omit<Transcript, 'id' | 'created_at' | 'updated_at'> & { id?: number; created_at?: Date; updated_at?: Date }) {
     super(); //allows us to use the validateWithSchema method at 'this' level
     const validated = TranscriptDTO.validate(data);
@@ -140,6 +130,18 @@ export class TranscriptDTO extends BaseDTO implements Transcript {
     this.created_at = validated.created_at;
     this.updated_at = validated.updated_at;
   }
+
+  // Zod schema
+  static transcriptSchema = z.object({
+    id: z.number().optional(),
+    video_id: z.string(),
+    url: z.string(),
+    transcript_text: z.string(),
+    language: z.string().optional(),
+    is_generated: z.boolean().optional(),
+    created_at: z.union([z.date(), z.string().transform((str) => new Date(str))]).optional(),
+    updated_at: z.union([z.date(), z.string().transform((str) => new Date(str))]).optional(),
+  });
 
   // Validate full Transcript object and return validated data
   static validate(data: any): Transcript {
