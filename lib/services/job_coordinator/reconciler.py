@@ -1,3 +1,5 @@
+# Import task
+from tasks import job_wrapper
 import os
 import requests
 from rq import Queue
@@ -11,8 +13,6 @@ load_dotenv()
 REDIS_QUEUE_URL = os.getenv('REDIS_QUEUE_URL')
 queue = Queue(connection=Redis.from_url(REDIS_QUEUE_URL))
 
-# Import task
-from tasks import job_wrapper
 
 def reconcile_queue():
     """Repopulate RQ queue from API 'submitted' jobs."""
@@ -29,6 +29,7 @@ def reconcile_queue():
             print(f"Re-enqueued job {job['id']}")
         except Exception as e:
             print(f"Failed to re-enqueue job {job['id']}: {e}")
+
 
 if __name__ == '__main__':
     reconcile_queue()

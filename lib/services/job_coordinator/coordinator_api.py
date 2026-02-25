@@ -1,7 +1,6 @@
 from fastapi import FastAPI, HTTPException
 import subprocess
 import sys
-import os
 import logging
 from pydantic import BaseModel
 from dotenv import load_dotenv
@@ -17,15 +16,16 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
-# Get the absolute path to enqueuer.py (not needed when running as module)
-# ENQUEUER_PATH = os.path.join(script_dir, 'enqueuer.py')
-
 logging.info(f"Python executable: {sys.executable}")
 
 app = FastAPI()
 
+
 class EnqueueRequest(BaseModel):
+    '''Request model for enqueueing a job.
+    Provides automatic JSON validation and parameter checking.'''
     job_id: str
+
 
 @app.post("/enqueue")
 async def enqueue_job(request: EnqueueRequest):
@@ -38,8 +38,10 @@ async def enqueue_job(request: EnqueueRequest):
     max_retries = 3
     for attempt in range(max_retries):
         try:
-            logging.info(f"Attempting to enqueue job {job_id} (attempt {attempt + 1}/{max_retries})")
-            cmd = [sys.executable, "-m", "lib.services.job_coordinator.enqueuer", job_id]
+            logging.info(f"Attempting to enqueue job {job_id} "
+                         f"(attempt {attempt + 1}/{max_retries})")
+            cmd = [sys.executable, "-m",
+                   "lib.services.job_coordinator.enqueuer", job_id]
             logging.info(f"Running command: {' '.join(cmd)}")
             # Run the script with job_id as argument
             result = subprocess.run(
@@ -52,31 +54,39 @@ async def enqueue_job(request: EnqueueRequest):
             logging.info(f"Subprocess stdout: {result.stdout}")
             if result.stderr:
                 logging.warning(f"Subprocess stderr: {result.stderr}")
-            
+
             if result.returncode == 0:
                 logging.info(f"Successfully enqueued job {job_id}")
-                return {"message": f"Job {job_id} enqueued successfully", "output": result.stdout}
+                return {"message": f"Job {job_id} enqueued successfully",
+                        "output": result.stdout}
             else:
-                error_msg = f"Enqueue failed on attempt {attempt + 1}: {result.stderr}"
+                error_msg = (f"Enqueue failed on attempt {attempt + 1}: "
+                             f"{result.stderr}")
                 logging.warning(f"Job {job_id} enqueue failed: {error_msg}")
                 if attempt < max_retries - 1:
                     continue  # Retry
                 else:
-                    logging.error(f"Job {job_id} enqueue failed after {max_retries} attempts")
+                    msg = (f"Job {job_id} enqueue failed after "
+                           f"{max_retries} attempts")
+                    logging.error(msg)
                     raise HTTPException(status_code=500, detail=error_msg)
-        
+
         except subprocess.TimeoutExpired:
             error_msg = f"Enqueue timed out on attempt {attempt + 1}"
             logging.warning(f"Job {job_id} enqueue timeout: {error_msg}")
             if attempt < max_retries - 1:
                 continue
             else:
-                logging.error(f"Job {job_id} enqueue failed after {max_retries} timeouts")
+                msg = (f"Job {job_id} enqueue failed after "
+                       f"{max_retries} timeouts")
+                logging.error(msg)
                 raise HTTPException(status_code=500, detail=error_msg)
-    
+
     # This shouldn't be reached, but just in case
     logging.error(f"Unexpected end of retry loop for job {job_id}")
-    raise HTTPException(status_code=500, detail=f"Failed to enqueue job {job_id} after {max_retries} attempts")
+    detail_msg = (f"Failed to enqueue job {job_id} after "
+                  f"{max_retries} attempts")
+    raise HTTPException(status_code=500, detail=detail_msg)
 
 if __name__ == "__main__":
     logging.info("Starting coordinator API server on port 8000")

@@ -1,3 +1,5 @@
+# Import task function
+from .tasks import job_wrapper
 import os
 import sys
 import requests
@@ -10,7 +12,8 @@ from .job_helpers_funcs import update_job_status
 
 '''
 This script is called by coordinator_api.py to enqueue a specific job by ID.
-errors are printed to stderr and cause exit code 1 on failure, which is caught by coordinator_api.py.
+errors are printed to stderr and cause exit code 1 on failure,
+which is caught by coordinator_api.py.
 '''
 
 # Load env
@@ -18,21 +21,20 @@ load_dotenv()
 
 # RQ queue
 REDIS_QUEUE_URL = os.getenv('REDIS_QUEUE_URL')
-queue = Queue('default',connection=Redis.from_url(REDIS_QUEUE_URL))
+queue = Queue('default', connection=Redis.from_url(REDIS_QUEUE_URL))
 
-# Import task function
-from .tasks import job_wrapper
 
 def enqueue_job(job_id):
     """Enqueue a specific job by ID."""
     print(f"Enqueuer: Starting enqueue for job {job_id}", file=sys.stderr)
-    
+
     # GET job data from API
     api_base = os.getenv('API_BASE_URL')
     print(f"Enqueuer: API_BASE_URL = {api_base}", file=sys.stderr)
     response = requests.get(f'{api_base}/api/jobs/{job_id}')
-    print(f"Enqueuer: GET request status = {response.status_code}", file=sys.stderr)
-    
+    status_msg = f"Enqueuer: GET request status = {response.status_code}"
+    print(status_msg, file=sys.stderr)
+
     if response.status_code != 200:
         error_msg = f"Failed to get job {job_id}: {response.status_code}"
         print(error_msg, file=sys.stderr)
@@ -48,10 +50,12 @@ def enqueue_job(job_id):
     try:
         print(f"Enqueuer: Attempting to enqueue job {job_id}", file=sys.stderr)
         queue.enqueue(job_wrapper, job_id)
-        print(f"Enqueuer: Successfully enqueued job {job_id}", file=sys.stderr)
+        msg = f"Enqueuer: Successfully enqueued job {job_id}"
+        print(msg, file=sys.stderr)
         # Update status to 'queued' via API
         update_job_status(job_id, 'queued', 20)
-        print(f"Enqueuer: Updated job {job_id} status to queued", file=sys.stderr)
+        msg = f"Enqueuer: Updated job {job_id} status to queued"
+        print(msg, file=sys.stderr)
         sleep(1)
     except Exception as e:
         error_msg = f"Failed to enqueue job {job_id} to RQ: {e}"
@@ -60,8 +64,10 @@ def enqueue_job(job_id):
         try:
             update_job_status(job_id, 'error', error=f'Enqueue failed: {e}')
         except Exception as status_error:
-            print(f"Also failed to update job status: {status_error}", file=sys.stderr)
+            error_msg = f"Also failed to update job status: {status_error}"
+            print(error_msg, file=sys.stderr)
         sys.exit(1)
+
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
