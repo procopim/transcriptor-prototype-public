@@ -21,19 +21,19 @@ Transcriptor is a full-stack application with a decoupled Python service layer f
 
 ```
 User submits URL + question
-        ↓
-Next.js API creates job (status: submitted) → Postgres
-        ↓
-Python Enqueuer picks up submitted jobs → Redis Queue (RQ)
-        ↓
-RQ Worker executes job:
-  - Fetches YouTube transcript
-  - Caches transcript in Postgres
-  - Sends transcript + question to xAI Grok
-  - Publishes progress events to Redis pub/sub
-        ↓
-Next.js SSE endpoint streams events back to client in real time
-        ↓
+\_
+   Next.js API creates job (status: submitted) → Postgres
+   \_     
+      Python Enqueuer submits job to Redis Queue (RQ)
+      \_        
+        Python RQ Worker executes job:
+                - Fetches YouTube transcript
+                - Caches transcript in Postgres
+                - Sends transcript + question to xAI Grok
+                - Publishes progress events to Redis pub/sub
+                
+        Next.js SSE endpoint streams events back to client in real time
+   _/            
 Client receives timestamped results
 ```
 
